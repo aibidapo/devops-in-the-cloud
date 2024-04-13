@@ -1,0 +1,5 @@
+[hosts]
+node1
+
+# [hosts:vars]
+# ansible_connection=local

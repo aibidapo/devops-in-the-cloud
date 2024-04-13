@@ -1,0 +1,123 @@
+---
+- name: Bootstrap Main Node
+  hosts: main
+  # remote_user: ubuntu
+  become: yes
+  vars:
+    listen_address: 0.0.0.0
+    listen_port: 9090
+  
+  tasks:
+  - name: Install prerequisite packages
+    apt:
+      name: "{{ item }}"
+      state: present
+    loop:
+      - apt-transport-https
+      - software-properties-common
+      - wget
+
+  - name: Import GPG key
+    shell: |
+      sudo mkdir -p /etc/apt/keyrings/
+      wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/grafana.gpg > /dev/null
+    args:
+      executable: /bin/bash
+
+  - name: Add stable repository
+    apt_repository:
+      repo: "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main"
+      state: present
+
+  - name: Update apt cache after adding repository
+    apt:
+      update_cache: yes
+
+  - name: Install Grafana
+    apt:
+      name: grafana-enterprise
+      state: present
+    become: yes
+
+  - name: Ensure Grafana service is enabled and started
+    become: yes
+    service:
+      name: grafana-server
+      state: started
+      enabled: yes
+
+  - name: Download Prometheus
+    ansible.builtin.get_url:
+      url: https://github.com/prometheus/prometheus/releases/download/v2.30.3/prometheus-2.30.3.linux-amd64.tar.gz
+      dest: /home/ubuntu
+
+  - name: Extract Prometheus Resources
+    ansible.builtin.unarchive:
+      src: /home/ubuntu/prometheus-2.30.3.linux-amd64.tar.gz
+      dest: /home/ubuntu
+      remote_src: yes
+
+  - name: Create Prometheus Group
+    ansible.builtin.group:
+      name: prometheus
+      state: present
+
+  - name: Create Prometheus User
+    ansible.builtin.user:
+      comment: Prometheus User
+      name: prometheus
+      group: prometheus      
+      shell: /sbin/nologin
+
+  - name: Create Prometheus Directory
+    ansible.builtin.file:
+      path: "{{ item }}"
+      state: directory
+      recurse: true
+      owner: prometheus
+      group: prometheus
+      mode: '0755'
+
+    loop:
+      - /etc/prometheus/
+      - /etc/prometheus/rules
+      - /etc/prometheus/rules.d
+      - /etc/prometheus/files_sd
+      - /var/lib/prometheus
+  
+  - name: Copy Files
+    ansible.builtin.copy:
+      src: "{{ item }}"
+      dest: /usr/local/bin
+      remote_src: yes
+      mode: '0755'
+      owner: prometheus
+      group: prometheus
+    loop:
+      - /home/ubuntu/prometheus-2.30.3.linux-amd64/prometheus
+      - /home/ubuntu/prometheus-2.30.3.linux-amd64/promtool
+
+  - name: Copy Files
+    ansible.builtin.copy:
+      src: "{{ item }}"
+      dest: /etc/prometheus/
+      remote_src: yes
+    loop:
+      - /home/ubuntu/prometheus-2.30.3.linux-amd64/consoles/
+      - /home/ubuntu/prometheus-2.30.3.linux-amd64/console_libraries/
+
+  - name: Create Config File
+    ansible.builtin.template:
+      src: prometheus.yml.j2
+      dest: /etc/prometheus/prometheus.yml
+
+  - name: Create Systemd File
+    ansible.builtin.template:
+      src: prometheus.service.j2
+      dest: /etc/systemd/system/prometheus.service
+
+  - name: Ensure Prometheus is started
+    ansible.builtin.service:
+      name: prometheus
+      state: started
+      enabled: yes

@@ -1,0 +1,43 @@
+---
+- name: Uninstall Grafana
+  hosts: hosts
+  become: yes
+
+  tasks:
+  - name: Ensure Grafana is stopped
+    ansible.builtin.service:
+      name: grafana-server
+      state: stopped
+
+  - name: Uninstall Grafana
+    ansible.builtin.package:
+      name: grafana-enterprise
+      state: absent
+   
+  - name: Remove GPG key
+    ansible.builtin.command:
+      shell: rpm -e gpg-pubkey-10458545-64e78669
+      ignore_errors: yes
+      
+
+  - name: Remove Grafana YUM repository
+    ansible.builtin.yum_repository:
+      name: grafana
+      description: Grafana YUM repository
+      baseurl: https://rpm.grafana.com
+      gpgcheck: yes
+      gpgkey: https://rpm.grafana.com/gpg.key
+      sslverify: yes
+      sslcacert: /etc/pki/tls/certs/ca-bundle.crt
+      enabled: yes
+      exclude: "*beta*"
+
+      state: absent
+    
+
+
+
+
+
+        
+

@@ -1,0 +1,37 @@
+---
+- name: Install Grafana
+  hosts: hosts
+  become: yes
+
+  tasks:
+  - name: Download rpm key
+    ansible.builtin.rpm_key:
+      key: https://rpm.grafana.com/gpg.key
+      state: present
+
+  - name: Add Grafana YUM repository
+    ansible.builtin.yum_repository:
+      name: grafana
+      description: Grafana YUM repository
+      baseurl: https://rpm.grafana.com
+      gpgcheck: yes
+      gpgkey: https://rpm.grafana.com/gpg.key
+      sslverify: yes
+      sslcacert: /etc/pki/tls/certs/ca-bundle.crt
+      enabled: yes
+      exclude: "*beta*"
+    
+  - name: Install Grafana
+    ansible.builtin.package:
+      name: grafana-enterprise
+      state: present
+
+
+  - name: Ensure Grafana is started and enabled
+    ansible.builtin.service:
+      name: grafana-server
+      state: started
+      enabled: yes
+
+        
+
