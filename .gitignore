@@ -39,4 +39,5 @@ terraform.rc
 # Misc
 *.pem
 
-
+# Terraform cloud credentials
+terraform-token
