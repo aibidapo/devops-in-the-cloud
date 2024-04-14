@@ -46,22 +46,25 @@
         enabled: yes
         state: started
 
-    - name: Configure firewall for Jenkins
-      firewalld:
-        service: jenkins
-        immediate: yes
-        permanent: yes
-        state: enabled
-      ignore_errors: yes
+    # - name: Configure firewall for Jenkins
+    #   firewalld:
+    #     service: jenkins
+    #     immediate: yes
+    #     permanent: yes
+    #     state: enabled
+    #   ignore_errors: yes
 
-    - name: Configure firewall for Jenkins
-      ufw:
-        rule: allow
-        port: 8080
-        proto: tcp
-      ignore_errors: yes
+    # - name: Configure firewall for Jenkins
+    #   ufw:
+    #     rule: allow
+    #     port: "{{ item }}"
+    #     proto: tcp
+    #   loop:
+    #     - 8080
+    #     - 22
+    #   ignore_errors: yes
 
-    - name: Enable UFW
-      ufw:
-        state: enabled
-      ignore_errors: yes
+    # - name: Enable UFW
+    #   ufw:
+    #     state: enabled
+    #   ignore_errors: yes
