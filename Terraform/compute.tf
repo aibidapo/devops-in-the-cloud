@@ -82,7 +82,7 @@ resource "terraform_data" "grafana_update" {
 
 
 
-
+/*
 resource "terraform_data" "grafana_install" {
 
   depends_on = [aws_instance.ai_devops_prod_main]
@@ -90,6 +90,8 @@ resource "terraform_data" "grafana_install" {
     command = "ansible-playbook -i aws_hosts --key-file ~/.ssh/ai-devops-prod-key ../Ansible/Playbooks/main-playbook.yml"
   }
 }
+
+*/
 
 output "grafana_access" {
   value = { for i in aws_instance.ai_devops_prod_main[*] : i.tags.Name => "${i.public_ip}:3000" }
