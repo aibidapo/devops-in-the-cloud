@@ -10,7 +10,7 @@ data "aws_ami" "server_ami" {
 
 
 data "aws_ssm_parameter" "ssh_pub_key" {
-  name = ai-devops-prod-key
+  name = "ai-devops-prod-key"
 }
 
 
