@@ -8,15 +8,30 @@ data "aws_ami" "server_ami" {
   }
 }
 
+
+data "aws_ssm_parameter" "ssh_pub_key" {
+  name = ai-devops-prod-key
+}
+
+
 resource "random_id" "ai_devops_prod_node_id" {
   byte_length = 2
   count       = var.main_instance_count
 }
 
+
+resource "aws_key_pair" "ai_devops_prod_auth" {
+  key_name   = var.key_name
+  public_key = data.aws_ssm_parameter.ssh_pub_key.value
+}
+
+
+/*
 resource "aws_key_pair" "ai_devops_prod_auth" {
   key_name   = var.key_name
   public_key = file(var.public_key_path)
 }
+*/
 
 resource "aws_instance" "ai_devops_prod_main" {
 
