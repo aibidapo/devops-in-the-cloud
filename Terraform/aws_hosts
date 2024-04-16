@@ -1,3 +1,4 @@
 [main]
 54.147.38.209
+host_key_checking = False
 
