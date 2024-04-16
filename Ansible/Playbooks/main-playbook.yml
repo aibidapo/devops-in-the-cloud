@@ -4,18 +4,18 @@
   gather_facts: false
 
   tasks:
-    - name: Retrieve SSH private key from AWS SSM Parameter Store
-      aws_ssm:
-        region: "us-east-1"
-        names: "ai-devops-prod-key"
-        with_decryption: true
-      register: ssh_key_result
+    # - name: Retrieve SSH private key from AWS SSM Parameter Store
+    #   aws_ssm:
+    #     region: "us-east-1"
+    #     names: "ai-devops-prod-key"
+    #     with_decryption: true
+    #   register: ssh_key_result
 
-    - name: Store SSH private key locally
-      copy:
-        content: "{{ ssh_key_result.parameters[0].value }}"
-        dest: "/home/ansible/ssh_keys/ai-devops-prod-key.pem"
-        mode: "0600"
+    # - name: Store SSH private key locally
+    #   copy:
+    #     content: "{{ ssh_key_result.parameters[0].value }}"
+    #     dest: "/home/ansible/ssh_keys/ai-devops-prod-key.pem"
+    #     mode: "0600"
 
 
 - name: Bootstrap Main Node
