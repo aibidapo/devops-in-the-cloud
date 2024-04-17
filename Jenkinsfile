@@ -14,8 +14,9 @@ pipeline{
         }
         stage('Plan'){
             steps{
-                sh 'cd Terraform'
-                sh 'terraform plan -no-color'               
+                sh 'cd Terraform/'
+                sh 'ls -l'
+                // sh 'terraform plan -no-color'               
             }
         }
     }
