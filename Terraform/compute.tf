@@ -52,9 +52,16 @@ resource "aws_instance" "ai_devops_prod_main" {
   }
 
   provisioner "local-exec" {
-    command = "printf '\n${self.public_ip}' >> aws_hosts && aws ec2 wait instance-status-ok --instance-ids ${self.id} --region us-east-1"
+    command = "printf '\n${self.public_ip}' >> aws_hosts"
   }
 
+# Keeping this as a note for reference
+
+/*
+  provisioner "local-exec" {
+    command = "printf '\n${self.public_ip}' >> aws_hosts && aws ec2 wait instance-status-ok --instance-ids ${self.id} --region us-east-1"
+  }
+*/
 
   provisioner "local-exec" {
     when    = destroy

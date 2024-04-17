@@ -20,10 +20,29 @@ pipeline {
                 dir('Terraform') {
                     withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
                         sh 'ls -l' // List files in the Terraform directory
-                        sh 'terraform plan -no-color' // Uncomment this line to run terraform plan within the Terraform directory
+                        sh 'terraform plan -no-color' 
                     }
                 }
             }
         }
+        stage('Apply') {
+            steps {
+                dir('Terraform') {
+                    withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
+                        sh 'terraform apply -auto-approve -no-color' 
+                    }
+                }
+            }
+        }
+        stage('Destroy') {
+            steps {
+                dir('Terraform') {
+                    withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
+                        sh 'terraform destroy -auto-approve -no-color' 
+                    }
+                }
+            }
+        }        
+        
     }
 }
