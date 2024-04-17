@@ -36,8 +36,11 @@ pipeline {
         }
         stage('EC2 Wait') {
             steps {
+                dir('Terraform'){
+                    withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
                 sh 'aws ec2 wait instance-status-ok --region us-west-1'
             }
+        }
 
         }
         stage('Destroy') {
