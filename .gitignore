@@ -43,4 +43,4 @@ terraform.rc
 terraform-token
 
 # Exclude .vscode folder
-*.vscode
+.vscode
