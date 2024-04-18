@@ -43,7 +43,7 @@ pipeline {
             steps {
                 dir('Terraform') {
                     withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
-                        sh 'terraform apply -auto-approve -no-color' 
+                        sh 'terraform apply -auto-approve -no-color -var-file="test.tfvars"'
                     }
                 }
             }
@@ -93,6 +93,16 @@ pipeline {
                     }
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'success!'
+        }
+
+        failure {
+            sh 'terraform destroy -auto-approve -no-color'
         }
     }
 }
