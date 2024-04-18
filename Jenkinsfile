@@ -56,7 +56,15 @@ pipeline {
                 }
             }
         }
-
+        stage('Validate Ansible') {
+            input {
+                message "Do you want to run Ansible? "
+                ok "Run Ansible!"
+            }
+            steps {
+                echo 'Running playbook'
+            }
+        }
         stage('Run Ansible') {
             steps {
                 dir('Ansible/Playbooks') {
@@ -64,6 +72,16 @@ pipeline {
                         sh 'ansible-playbook main-playbook.yml -i ../../Terraform/aws_hosts --private-key=$SSH_KEY --user=ubuntu'
                     }
                 }
+            }
+        }
+
+        stage('Validate Infrastructure Destruction') {
+            input {
+                message "Are you sure you want to destroy the infrastructure? "
+                ok "Destroy!"
+            }
+            steps {
+                echo "Destroying DevOps In The Cloud Infrastructure"
             }
         }
 
