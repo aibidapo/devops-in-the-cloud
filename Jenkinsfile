@@ -51,7 +51,7 @@ pipeline {
 
         stage('Run Ansible') {
             steps {
-                dir('Ansible/Playbook') {
+                dir('Ansible/Playbooks') {
                     withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY')]) {
                         sh 'ansible-playbook main-playbook.yml -i aws_hosts --private-key=$SSH_KEY'
                     }
