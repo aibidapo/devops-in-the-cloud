@@ -53,7 +53,7 @@ pipeline {
             steps {
                 dir('Ansible/Playbooks') {
                     withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY')]) {
-                        sh 'ansible-playbook main-playbook.yml -i aws_hosts --private-key=$SSH_KEY'
+                        sh 'ansible-playbook main-playbook.yml -i ../../Terraform/aws_hosts --private-key=$SSH_KEY'
                     }
                 }
             }
