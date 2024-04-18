@@ -1,9 +1,12 @@
 pipeline {
     agent any
+
     environment {
         TF_IN_AUTOMATION = 'true'
         TF_CLI_CONFIG_FILE = credentials('tf-creds')
+        SSH_KEY_PARAM = sh(script: 'aws ssm get-parameter --name ai-devops-prod-key --with-decryption --query "Parameter.Value" --output text', returnStdout: true).trim()
     }
+
     stages {
         stage('Init') {
             steps {
@@ -15,6 +18,7 @@ pipeline {
                 }
             }
         }
+
         stage('Plan') {
             steps {
                 dir('Terraform') {
@@ -25,6 +29,7 @@ pipeline {
                 }
             }
         }
+
         stage('Apply') {
             steps {
                 dir('Terraform') {
@@ -34,17 +39,27 @@ pipeline {
                 }
             }
         }
+
         stage('EC2 Wait') {
             steps {
-                dir('Terraform'){
-                    withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
-                        sh 'aws ec2 wait instance-status-ok --region us-east-1'
-                    }
+                withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
+                    sh 'aws ec2 wait instance-status-ok --region us-east-1'
                 }
             }
-
         }
-        
+
+        stage('Ansible') {
+            steps {
+                withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY')]) {
+                    sh '''
+                        echo "$SSH_KEY_PARAM" > /tmp/ssh_key.pem
+                        chmod 600 /tmp/ssh_key.pem
+                        ansible-playbook -i Terraform/aws_hosts Ansible/Playbook/main-playbook.yml --private-key=/tmp/ssh_key.pem
+                    '''
+                }
+            }
+        }
+
         stage('Destroy') {
             steps {
                 dir('Terraform') {
@@ -53,7 +68,6 @@ pipeline {
                     }
                 }
             }
-        }        
-        
+        }
     }
 }
