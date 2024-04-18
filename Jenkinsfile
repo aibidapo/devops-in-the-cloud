@@ -41,13 +41,11 @@ pipeline {
                 }
             }
         }
-        stage('Ansible') {
-            steps {
-                dir('Ansible/Playbooks') { 
-                    ansiblePlaybook(credentialsId: 'ec2-ssh-key', playbook: 'main-playbook.yml' inventory: 'aws_hosts')
-                }
-            }
-        }
+
+
+
+
+
         stage('Destroy') {
             steps {
                 dir('Terraform') {
