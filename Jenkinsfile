@@ -49,14 +49,12 @@ pipeline {
             }
         }
 
-        stage('Ansible') {
+        stage('Run Ansible') {
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY')]) {
-                    sh '''
-                        echo "$SSH_KEY_PARAM" > /tmp/ssh_key.pem
-                        chmod 600 /tmp/ssh_key.pem
-                        ansible-playbook -i Terraform/aws_hosts Ansible/Playbook/main-playbook.yml --private-key=/tmp/ssh_key.pem
-                    '''
+                dir('Ansible/Playbook') {
+                    withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY')]) {
+                        sh 'ansible-playbook playbook.yml -i aws_hosts --private-key=$SSH_KEY'
+                    }
                 }
             }
         }
