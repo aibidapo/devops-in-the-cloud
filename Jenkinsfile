@@ -14,6 +14,7 @@ pipeline {
                 dir('Terraform') {
                     withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
                         sh 'ls' // List files in the Terraform directory
+                        sh 'cat $BRANCH_NAME.tfvars'
                         sh 'terraform init -no-color' // Run terraform init within the Terraform directory
                     }
                 }
@@ -25,7 +26,7 @@ pipeline {
                 dir('Terraform') {
                     withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
                         sh 'ls -l' // List files in the Terraform directory
-                        sh 'terraform plan -no-color' 
+                        sh 'terraform plan -no-color -var-file="$BRANCH_NAME.tfvars"' 
                     }
                 }
             }
@@ -43,7 +44,7 @@ pipeline {
             steps {
                 dir('Terraform') {
                     withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
-                        sh 'terraform apply -auto-approve -no-color -var-file="test.tfvars"'
+                        sh 'terraform apply -auto-approve -no-color -var-file="$BRANCH_NAME.tfvars"'
                     }
                 }
             }
@@ -89,7 +90,7 @@ pipeline {
             steps {
                 dir('Terraform') {
                     withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
-                        sh 'terraform destroy -auto-approve -no-color' 
+                        sh 'terraform destroy -auto-approve -no-color -var-file="$BRANCH_NAME.tfvars"' 
                     }
                 }
             }
@@ -102,7 +103,7 @@ pipeline {
         }
 
         failure {
-            sh 'terraform destroy -auto-approve -no-color'
+            sh 'terraform destroy -auto-approve -no-color -var-file="$BRANCH_NAME.tfvars"'
         }
     }
 }
