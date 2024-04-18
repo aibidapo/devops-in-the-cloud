@@ -2,9 +2,10 @@ pipeline {
     agent any
 
     environment {
+        AWS_DEFAULT_REGION = 'us-east-1'
         TF_IN_AUTOMATION = 'true'
         TF_CLI_CONFIG_FILE = credentials('tf-creds')
-        SSH_KEY_PARAM = sh(script: 'aws ssm get-parameter --name ai-devops-prod-key --with-decryption --query "Parameter.Value" --output text', returnStdout: true).trim()
+        SSH_KEY_PARAM = sh(script: 'aws ssm get-parameter --name ai-devops-prod-key --with-decryption --query "Parameter.Value" --output text --region us-east-1', returnStdout: true).trim()
     }
 
     stages {
