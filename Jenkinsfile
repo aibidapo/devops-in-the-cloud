@@ -26,7 +26,7 @@ pipeline {
                 dir('Terraform') {
                     withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
                         sh 'ls -l' // List files in the Terraform directory
-                        sh 'terraform plan -no-color -var-file="$BRANCH_NAME.tfvars"' 
+                        sh 'terraform destroy -auto-approve -no-color -var-file=\'$BRANCH_NAME.tfvars\''
                     }
                 }
             }
@@ -48,7 +48,7 @@ pipeline {
             steps {
                 dir('Terraform') {
                     withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
-                        sh 'terraform apply -auto-approve -no-color -var-file="$BRANCH_NAME.tfvars"'
+                        sh 'terraform destroy -auto-approve -no-color -var-file=\'$BRANCH_NAME.tfvars\''
                     }
                 }
             }
@@ -76,9 +76,9 @@ pipeline {
         }
         stage('Run Ansible') {
             steps {
-                dir('Ansible/Playbooks') {
+                dir('Ansible/Playbooks/') {
                     withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY')]) {
-                        sh 'ansible-playbook main-playbook.yml -i ../../Terraform/aws_hosts --private-key=$SSH_KEY --user=ubuntu'
+                        sh 'ansible-playbook main-playbook.yml -i ../../Terraform/aws_hosts --private-key=${SSH_KEY} --user=ubuntu'
                     }
                 }
             }
@@ -98,7 +98,7 @@ pipeline {
             steps {
                 dir('Terraform') {
                     withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
-                        sh 'terraform destroy -auto-approve -no-color -var-file="$BRANCH_NAME.tfvars"' 
+                        sh 'terraform destroy -auto-approve -no-color -var-file=\'$BRANCH_NAME.tfvars\''
                     }
                 }
             }
@@ -107,14 +107,14 @@ pipeline {
 
     post {
         success {
-            echo 'success!'
+            echo 'Success!'
         }
 
         failure {
-            sh 'terraform destroy -auto-approve -no-color -var-file="$BRANCH_NAME.tfvars"'
+            sh 'terraform destroy -auto-approve -no-color -var-file=\'$BRANCH_NAME.tfvars\''
         }
         aborted {
-            sh 'terraform destroy -auto-approve -no-color -var-file="$BRANCH_NAME.tfvars"'
+            sh 'terraform destroy -auto-approve -no-color -var-file=\'$BRANCH_NAME.tfvars\''
         }        
     }
 }
