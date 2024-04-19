@@ -12,7 +12,7 @@ pipeline {
                 dir('Terraform') {
                     withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
                         sh 'ls' 
-                        sh 'cat $BRANCH_NAME.tfvars'
+                        sh "cat ${BRANCH_NAME}.tfvars"
                         sh 'terraform init -no-color' 
                     }
                 }
@@ -24,7 +24,7 @@ pipeline {
                 dir('Terraform') {
                     withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
                         sh 'ls -l' 
-                        sh "terraform plan -auto-approve -no-color -var-file=${BRANCH_NAME}.tfvars"
+                        sh "terraform plan -no-color -var-file=${BRANCH_NAME}.tfvars"
                     }
                 }
             }
