@@ -54,8 +54,10 @@ pipeline {
 
         stage('EC2 Wait') {
             steps {
-                withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
-                    sh 'aws ec2 wait instance-status-ok --region us-east-1'
+                dir('Terraform') {
+                    withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
+                        sh 'aws ec2 wait instance-status-ok --region us-east-1'
+                    }
                 }
             }
         }
@@ -109,10 +111,15 @@ pipeline {
         }
 
         failure {
-            sh "terraform destroy -auto-approve -no-color -var-file=${BRANCH_NAME}.tfvars"
+            dir('Terraform') {
+                sh "terraform destroy -auto-approve -no-color -var-file=${BRANCH_NAME}.tfvars"
+            }
         }
+
         aborted {
-            sh "terraform destroy -auto-approve -no-color -var-file=${BRANCH_NAME}.tfvars"
-        }        
+            dir('Terraform') {
+                sh "terraform destroy -auto-approve -no-color -var-file=${BRANCH_NAME}.tfvars"
+            }    
+        }    
     }
 }
