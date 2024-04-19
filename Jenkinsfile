@@ -112,14 +112,19 @@ pipeline {
 
         failure {
             dir('Terraform') {
-                sh "terraform destroy -auto-approve -no-color -var-file=${BRANCH_NAME}.tfvars"
+                withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
+                    sh "terraform destroy -auto-approve -no-color -var-file=${BRANCH_NAME}.tfvars"
+                }
             }
         }
 
         aborted {
             dir('Terraform') {
-                sh "terraform destroy -auto-approve -no-color -var-file=${BRANCH_NAME}.tfvars"
+                withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
+                    sh "terraform destroy -auto-approve -no-color -var-file=${BRANCH_NAME}.tfvars"
+                }    
+               
             }    
-        }    
+        }
     }
 }
