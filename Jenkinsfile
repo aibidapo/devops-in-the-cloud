@@ -1,11 +1,9 @@
 pipeline {
     agent any
 
-    environment {
-        // AWS_DEFAULT_REGION = 'us-east-1'
+    environment {        
         TF_IN_AUTOMATION = 'true'
-        TF_CLI_CONFIG_FILE = credentials('tf-creds')
-        // SSH_KEY_PARAM = sh(script: 'aws ssm get-parameter --name ai-devops-prod-key --with-decryption --query "Parameter.Value" --output text --region us-east-1', returnStdout: true).trim()
+        TF_CLI_CONFIG_FILE = credentials('tf-creds')       
     }
 
     stages {
@@ -13,9 +11,9 @@ pipeline {
             steps {
                 dir('Terraform') {
                     withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
-                        sh 'ls' // List files in the Terraform directory
+                        sh 'ls' 
                         sh 'cat $BRANCH_NAME.tfvars'
-                        sh 'terraform init -no-color' // Run terraform init within the Terraform directory
+                        sh 'terraform init -no-color' 
                     }
                 }
             }
@@ -25,8 +23,8 @@ pipeline {
             steps {
                 dir('Terraform') {
                     withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
-                        sh 'ls -l' // List files in the Terraform directory
-                        sh "terraform destroy -auto-approve -no-color -var-file=${BRANCH_NAME}.tfvars"
+                        sh 'ls -l' 
+                        sh "terraform plan -auto-approve -no-color -var-file=${BRANCH_NAME}.tfvars"
                     }
                 }
             }
@@ -48,7 +46,7 @@ pipeline {
             steps {
                 dir('Terraform') {
                     withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
-                        sh "terraform destroy -auto-approve -no-color -var-file=${BRANCH_NAME}.tfvars"
+                        sh "terraform apply -auto-approve -no-color -var-file=${BRANCH_NAME}.tfvars"
                     }
                 }
             }
