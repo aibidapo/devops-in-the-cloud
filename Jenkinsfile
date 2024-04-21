@@ -52,6 +52,17 @@ pipeline {
             }
         }
 
+        stage('Inventory') {
+            steps {
+                dir('Terraform') {
+                    withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
+                        sh 'printf "\\n$(terraform output -json instance_ips | jq -r \'.[]\')" >> aws_hosts'
+                    }
+                }                
+            }
+
+        }
+
         stage('EC2 Wait') {
             steps {
                 dir('Terraform') {

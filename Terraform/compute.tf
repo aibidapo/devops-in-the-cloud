@@ -51,9 +51,9 @@ resource "aws_instance" "ai_devops_prod_main" {
     Name = "${local.account_name}-main-${random_id.ai_devops_prod_node_id[count.index].dec}"
   }
 
-  provisioner "local-exec" {
-    command = "printf '\n${self.public_ip}' >> aws_hosts"
-  }
+  # provisioner "local-exec" {
+  #   command = "printf '\n${self.public_ip}' >> aws_hosts"
+  # }
 
   # Keeping this as a note for reference
 
@@ -63,10 +63,10 @@ resource "aws_instance" "ai_devops_prod_main" {
   }
 */
 
-  provisioner "local-exec" {
-    when    = destroy
-    command = "sed -i '/^[0-9]/d' aws_hosts"
-  }
+  # provisioner "local-exec" {
+  #   when    = destroy
+  #   command = "sed -i '/^[0-9]/d' aws_hosts"
+  # }
 
 }
 /*
@@ -100,6 +100,10 @@ resource "terraform_data" "grafana_install" {
 
 */
 
+
+output "instance_ips" {
+  value = [for i in aws_instance.ai_devops_prod_main[*]: i.public_ip]
+}
 output "grafana_access" {
   value = { for i in aws_instance.ai_devops_prod_main[*] : i.tags.Name => "${i.public_ip}:3000" }
 }
