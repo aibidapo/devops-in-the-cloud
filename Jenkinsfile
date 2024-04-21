@@ -69,10 +69,19 @@ pipeline {
                     withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
                         // sh 'aws ec2 wait instance-status-ok --region us-east-1'
                         sh '''aws ec2 wait instance-status-ok \\
-                            --instance-ids $(terraform show -json | jq -r \'.values.root_module.resources[] | select(.type == "aws_instance").values.id\') \\
+                            --instance-ids $(terraform output -json instance_ids | jq -r \'.[]\') \\
                             --region us-east-1''' 
                     }
                 }
+                dir('Terraform') {
+                    withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
+                        // sh 'aws ec2 wait instance-status-ok --region us-east-1'
+                        // sh '''aws ec2 wait instance-status-ok \\
+                        //     --instance-ids $(terraform show -json | jq -r \'.values.root_module.resources[] | select(.type == "aws_instance").values.id\') \\
+                        //     --region us-east-1''' 
+                    }
+                }
+
             }
         }
         stage('Validate Ansible') {
