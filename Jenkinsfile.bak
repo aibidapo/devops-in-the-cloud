@@ -2,16 +2,17 @@ pipeline {
     agent any
 
     environment {
+        // AWS_DEFAULT_REGION = 'us-east-1'
         TF_IN_AUTOMATION = 'true'
+        TF_CLI_CONFIG_FILE = credentials('tf-creds')
+        // SSH_KEY_PARAM = sh(script: 'aws ssm get-parameter --name ai-devops-prod-key --with-decryption --query "Parameter.Value" --output text --region us-east-1', returnStdout: true).trim()
     }
 
     stages {
         stage('Init') {
             steps {
                 dir('Terraform') {
-                    withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c'),
-                                     string(credentialsId: 'terraform-cloud-api-token', variable: 'TF_CLOUD_API_TOKEN')]) {
-                        sh 'export TF_TOKEN_app_terraform_io=$TF_CLOUD_API_TOKEN'
+                    withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
                         sh 'ls' // List files in the Terraform directory
                         sh 'cat $BRANCH_NAME.tfvars'
                         sh 'terraform init -no-color' // Run terraform init within the Terraform directory
@@ -23,16 +24,13 @@ pipeline {
         stage('Plan') {
             steps {
                 dir('Terraform') {
-                    withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c'),
-                                     string(credentialsId: 'terraform-cloud-api-token', variable: 'TF_CLOUD_API_TOKEN')]) {
-                        sh 'export TF_TOKEN_app_terraform_io=$TF_CLOUD_API_TOKEN'
+                    withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
                         sh 'ls -l' // List files in the Terraform directory
                         sh 'terraform plan -no-color -var-file="$BRANCH_NAME.tfvars"' 
                     }
                 }
             }
         }
-
         stage('Validate Apply'){
             when {
                 beforeInput true
@@ -46,13 +44,10 @@ pipeline {
                 echo 'Apply Accepted'
             }
         }
-
         stage('Apply') {
             steps {
                 dir('Terraform') {
-                    withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c'),
-                                     string(credentialsId: 'terraform-cloud-api-token', variable: 'TF_CLOUD_API_TOKEN')]) {
-                        sh 'export TF_TOKEN_app_terraform_io=$TF_CLOUD_API_TOKEN'
+                    withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
                         sh 'terraform apply -auto-approve -no-color -var-file="$BRANCH_NAME.tfvars"'
                     }
                 }
@@ -66,7 +61,6 @@ pipeline {
                 }
             }
         }
-
         stage('Validate Ansible') {
             when {
                 beforeInput true
@@ -80,7 +74,6 @@ pipeline {
                 echo 'Running playbook'
             }
         }
-
         stage('Run Ansible') {
             steps {
                 dir('Ansible/Playbooks') {
@@ -104,9 +97,7 @@ pipeline {
         stage('Destroy') {
             steps {
                 dir('Terraform') {
-                    withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c'),
-                                     string(credentialsId: 'terraform-cloud-api-token', variable: 'TF_CLOUD_API_TOKEN')]) {
-                        sh 'export TF_TOKEN_app_terraform_io=$TF_CLOUD_API_TOKEN'
+                    withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c')]) {
                         sh 'terraform destroy -auto-approve -no-color -var-file="$BRANCH_NAME.tfvars"' 
                     }
                 }
@@ -120,23 +111,10 @@ pipeline {
         }
 
         failure {
-            dir('Terraform') {
-                withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c'),
-                                 string(credentialsId: 'terraform-cloud-api-token', variable: 'TF_CLOUD_API_TOKEN')]) {
-                    sh 'export TF_TOKEN_app_terraform_io=$TF_CLOUD_API_TOKEN'
-                    sh 'terraform destroy -auto-approve -no-color -var-file="$BRANCH_NAME.tfvars"'
-                }
-            }
+            sh 'terraform destroy -auto-approve -no-color -var-file="$BRANCH_NAME.tfvars"'
         }
-
         aborted {
-            dir('Terraform') {
-                withCredentials([aws(credentialsId: '3232b887-94ae-4e90-bdfa-6e4bf09f378c'),
-                                 string(credentialsId: 'terraform-cloud-api-token', variable: 'TF_CLOUD_API_TOKEN')]) {
-                    sh 'export TF_TOKEN_app_terraform_io=$TF_CLOUD_API_TOKEN'
-                    sh 'terraform destroy -auto-approve -no-color -var-file="$BRANCH_NAME.tfvars"'
-                }
-            }
+            sh 'terraform destroy -auto-approve -no-color -var-file="$BRANCH_NAME.tfvars"'
         }
     }
 }
